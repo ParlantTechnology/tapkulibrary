@@ -43,10 +43,10 @@
 	height = self.view.frame.size.height - y;
 		
 	
-	_tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, y, self.view.bounds.size.width, height) style:UITableViewStylePlain];
+	_tableView = [[UITableView alloc] initWithFrame:CGRectMake(self.monthView.frame.origin.x, y, self.monthView.bounds.size.width, height) style:UITableViewStylePlain];
 	_tableView.delegate = self;
 	_tableView.dataSource = self;
-	_tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+	_tableView.autoresizingMask =  UIViewAutoresizingFlexibleHeight;
 	[self.view addSubview:_tableView];
 	[self.view sendSubviewToBack:_tableView];
 }
@@ -80,26 +80,30 @@
 	[self updateTableOffset:animated];
 }
 
-- (void) updateTableOffset:(BOOL)animated{
-	
-	
+- (void) updateTableOffset:(BOOL)animated {
+    UIInterfaceOrientation interfaceOrientation=[[UIApplication sharedApplication] statusBarOrientation];
 	if(animated){
 		[UIView beginAnimations:nil context:nil];
-		[UIView setAnimationDuration:0.4];
-		[UIView setAnimationDelay:0.1];
+		[UIView setAnimationDuration:0.2];
+        //[UIView setAnimationDelay:0.1];
 	}
-
-	
-	float y = self.monthView.frame.origin.y + self.monthView.frame.size.height;
-	self.tableView.frame = CGRectMake(self.tableView.frame.origin.x, y, self.tableView.frame.size.width, self.view.frame.size.height - y );
-	
-	if(animated) [UIView commitAnimations];
+    
+    if (UIInterfaceOrientationIsLandscape(interfaceOrientation)) {
+        float x = self.monthView.frame.origin.x + self.monthView.frame.size.width;
+        float w = self.view.frame.size.width-self.monthView.frame.size.width;
+        self.tableView.frame = CGRectMake(x,self.monthView.frame.origin.y , w, self.view.frame.size.height-self.monthView.frame.origin.y );
+    }
+    else
+    {
+        float y = self.monthView.frame.origin.y + self.monthView.frame.size.height;
+        self.tableView.frame = CGRectMake(self.monthView.frame.origin.x, y, self.monthView.frame.size.width, self.view.frame.size.height - y );
+    }
+    
+	if(animated)
+    {
+        [UIView commitAnimations];
+    }
 }
-
-
-
-
-
 
 
 @end

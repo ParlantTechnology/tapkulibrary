@@ -30,15 +30,33 @@
  */
 
 #import "CalendarMonthViewController.h"
-
+#import "AppDelegate.h"
 
 @implementation CalendarMonthViewController
 
 #pragma mark - View Lifecycle
+
+-(IBAction)CancelClicked:(id)sender
+{
+    if([self respondsToSelector:@selector(dismissViewControllerAnimated:completion:)])
+    {
+        [self dismissViewControllerAnimated:YES completion:Nil];
+    }
+    else
+    {
+        [self dismissModalViewControllerAnimated:YES];
+    } 
+    
+}
 - (void) viewDidLoad{
 	[super viewDidLoad];
 	[self.monthView selectDate:[NSDate month]];
-
+    UIButton *cancelBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    [cancelBtn setFrame:CGRectMake(0, 0, 60, 40)];
+    [cancelBtn setTitle:@"Cancel" forState:UIControlStateNormal];
+    [cancelBtn addTarget:self action:@selector(CancelClicked:) forControlEvents:UIControlEventTouchUpInside];
+    UIBarButtonItem *cancelButtonItem = [[UIBarButtonItem alloc] initWithCustomView:cancelBtn];
+    self.navigationItem.leftBarButtonItem = cancelButtonItem;
 }
 
 
@@ -65,10 +83,35 @@
 
 
 #pragma mark - UITableView Delegate & DataSource
+
 - (NSInteger) numberOfSectionsInTableView:(UITableView *)tableView {
 	return 1;
 	
 }
+
+- (UIView *) tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+{
+    if ([[UIDevice currentDevice] userInterfaceIdiom]==UIUserInterfaceIdiomPad)
+    {
+        NSArray *views =[[NSBundle mainBundle] loadNibNamed:@"CalendarTableHeader" owner:nil options:nil];
+        UIView *headerView=[views objectAtIndex:0];
+        return headerView;
+    }
+    else
+    {
+        return nil;
+    }
+}
+
+- (CGFloat) tableView:(UITableView *) tableView heightForHeaderInSection:(NSInteger) section {
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        return 25;
+    } else {
+        return 0;
+    }
+}
+
+
 - (NSInteger) tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {	
 	NSArray *ar = [self.dataDictionary objectForKey:[self.monthView dateSelected]];
 	if(ar == nil) return 0;
@@ -123,6 +166,16 @@
 		if([d compare:end]==NSOrderedDescending) break;
 	}
 	
+}
+
+-(void) didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
+{
+    [self updateTableOffset:YES];
+}
+
+
+- (BOOL) shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+	return YES;
 }
 
 

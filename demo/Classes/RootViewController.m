@@ -133,7 +133,7 @@
 		vc = [[NetworkRequestViewController alloc] init];
 	
 	
-	if(self.detailViewController && !(s==0 && r==1))
+	if(self.detailViewController)
 		[self.detailViewController setupWithMainController:vc];
 	else
 		[self.navigationController pushViewController:vc animated:YES];
