@@ -606,7 +606,7 @@
 	self.backgroundColor = [UIColor grayColor];
 
 	sunday = s;
-	currentTile = [[TKCalendarMonthTiles alloc] initWithMonth:[[NSDate date] firstOfMonth] marks:nil startDayOnSunday:sunday];
+	currentTile = [[TKCalendarMonthTiles alloc] initWithMonth:[NOW firstOfMonth] marks:nil startDayOnSunday:sunday];
 	[currentTile setTarget:self action:@selector(tile:)];
 	
 	CGRect r = CGRectMake(0, 0, self.tileBox.bounds.size.width, self.tileBox.bounds.size.height + self.tileBox.frame.origin.y);
@@ -617,7 +617,7 @@
 	[self.tileBox addSubview:currentTile];
 	[self addSubview:self.tileBox];
 	
-	NSDate *date = [NSDate date];
+	NSDate *date = NOW;
 	self.monthYear.text = [date monthYearString];
 	[self addSubview:self.monthYear];
 	
@@ -630,6 +630,7 @@
 	
 	NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
 	[dateFormat setDateFormat:@"eee"];
+// !!!: commented in current
 	[dateFormat setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 	
 	

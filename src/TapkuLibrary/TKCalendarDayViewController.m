@@ -60,22 +60,22 @@
 - (NSArray *)calendarDayTimelineView:(TKCalendarDayTimelineView*)calendarDayTimeline eventsForDate:(NSDate *)eventDate{
 	TKCalendarDayEventView *eventViewFirst = [TKCalendarDayEventView eventViewWithFrame:CGRectZero
 																		 id:nil 
-																  startDate:[[NSDate date]addTimeInterval:60 * 60 * 2] 
-																	endDate:[[NSDate date]addTimeInterval:60 * 60 * 24]
+																  startDate:[NOW dateByAddingTimeInterval:60 * 60 * 2] 
+																	endDate:[NOW dateByAddingTimeInterval:60 * 60 * 24]
 																	  title:@"First"
 																   location:@"Test Location"];
 	
 	TKCalendarDayEventView *eventViewSecond = [TKCalendarDayEventView eventViewWithFrame:CGRectZero
 																				  id:nil
-															 			   startDate:[NSDate date] 
-																			 endDate:[NSDate date]
+															 			   startDate:NOW 
+																			 endDate:NOW
 																			   title:@"Second ultra mega hypra long text to test again with more"
 																		    location:nil];
 	
 	return [NSArray arrayWithObjects:eventViewFirst, eventViewSecond, nil];
 }
 - (void)calendarDayTimelineView:(TKCalendarDayTimelineView*)calendarDayTimeline eventViewWasSelected:(TKCalendarDayEventView *)eventView{
-	NSLog(@"CalendarDayTimelineView: EventViewWasSelected");
+//	NSLog(@"CalendarDayTimelineView: EventViewWasSelected");
 }
 
 

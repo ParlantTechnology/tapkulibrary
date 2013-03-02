@@ -183,7 +183,7 @@
 	// Make it today
 	if (!self.currentDay) {
 		// Dont' want to inform the observer
-		_currentDay = [NSDate date];
+		_currentDay = NOW;
 	}
 	
 	// Remove all previous view event
@@ -289,7 +289,7 @@
 				}				
 				[sameTimeEvents addObject:event];
 				// Log the extracted date values
-				NSLog(@"hourStart: %d minuteStart: %d", hourStart, minuteStart);
+//				NSLog(@"hourStart: %d minuteStart: %d", hourStart, minuteStart);
 			}
 		}
 	}	
@@ -325,11 +325,11 @@
 	CGPoint pointInTimeLine = CGPointZero;
 	if (view == _timelineView) {
 		pointInTimeLine = tapPoint;
-		NSLog(@"Double Tapped TimelineView at point %@", NSStringFromCGPoint(pointInTimeLine));
+//		NSLog(@"Double Tapped TimelineView at point %@", NSStringFromCGPoint(pointInTimeLine));
 	}
 	else {
 		pointInTimeLine = [view convertPoint:tapPoint toView:self.scrollView];
-		NSLog(@"Double Tapped EventView at point %@", NSStringFromCGPoint(pointInTimeLine));		
+//		NSLog(@"Double Tapped EventView at point %@", NSStringFromCGPoint(pointInTimeLine));		
 	}
 	if (self.delegate && [self.delegate respondsToSelector:@selector(calendarDayTimelineView:eventDateWasSelected:)]) {
 		[self.delegate calendarDayTimelineView:self eventDateWasSelected:[self getTimeFromOffset:pointInTimeLine.y]];
