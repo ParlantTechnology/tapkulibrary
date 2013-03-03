@@ -46,6 +46,7 @@
 	UIColor *textColor;
 }
 
+@property (nonatomic, unsafe_unretained) NSObject *holder;
 @property (nonatomic, copy) NSNumber *id;
 @property (nonatomic, copy) NSDate *startDate;
 @property (nonatomic, copy) NSDate *endDate;

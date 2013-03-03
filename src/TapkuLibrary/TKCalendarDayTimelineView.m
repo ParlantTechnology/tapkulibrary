@@ -27,6 +27,7 @@
  OTHER DEALINGS IN THE SOFTWARE.
  
  */
+#import "Constants.h"
 
 #import "TKCalendarDayTimelineView.h"
 #import "NSDate+TKCategory.h"
@@ -138,6 +139,7 @@
 		_scrollView.scrollEnabled = TRUE;
 		_scrollView.backgroundColor =[UIColor whiteColor];
 		_scrollView.alwaysBounceVertical = TRUE;
+        _scrollView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
 	}
 	return _scrollView;
 }
@@ -193,8 +195,10 @@
 		}
 	}
 	
-	NSDateFormatter *format = [[NSDateFormatter alloc]init];
-	[format setDateFormat:@"EEEE  dd MM yyyy"];	
+	NSDateFormatter *format = [[NSDateFormatter alloc] init];
+    [format setTimeZone:[NSTimeZone timeZoneWithName:@"UTC"]];
+//	[format setDateFormat:@"EEEE  dd MM yyyy"];
+	[format setDateFormat:@"EEEE  MMM d yyyy"];
 	NSString *displayDate = [format stringFromDate:_currentDay];
 	self.monthYear.text = displayDate;
 	
@@ -213,9 +217,9 @@
 		CGFloat endMarker = 0.0f;
 		for (TKCalendarDayEventView *event in self.events) {
 			// Making sure delgate sending date that match current day
-			if ([event.startDate isSameDay:self.currentDay]) {
+			if ([event.startDate isSameDay:self.currentDay timeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]]) {
 				// Get the hour start position
-				NSInteger hourStart = [event.startDate dateInformation].hour;
+				NSInteger hourStart = [event.startDate dateInformationWithTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]].hour;
 				CGFloat hourStartPosition = roundf((hourStart * VERTICAL_DIFF) + VERTICAL_OFFSET + ((FONT_SIZE + 4.0) / 2.0));
 				// Get the minute start position
 				// Round minute to each 5
@@ -226,14 +230,14 @@
 				
 				
 				// Get the hour end position
-				NSInteger hourEnd = [event.endDate dateInformation].hour;
+				NSInteger hourEnd = [event.endDate dateInformationWithTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]].hour;
 				if (![event.startDate isSameDay:event.endDate]) {
 					hourEnd = 23;
 				}
 				CGFloat hourEndPosition = roundf((hourEnd * VERTICAL_DIFF) + VERTICAL_OFFSET + ((FONT_SIZE + 4.0) / 2.0));
 				// Get the minute end position
 				// Round minute to each 5
-				NSInteger minuteEnd = [event.endDate dateInformation].minute;
+				NSInteger minuteEnd = [event.endDate dateInformationWithTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]].minute;
 				if (![event.startDate isSameDay:event.endDate]) {
 					minuteEnd = 55;
 				}
@@ -346,6 +350,7 @@
 - (UIImageView *) topBackground{
 	if(topBackground==nil){
 		topBackground = [[UIImageView alloc] initWithImage:[UIImage imageWithContentsOfFile:TKBUNDLE(@"TapkuLibrary.bundle/Images/calendar/Month Grid Top Bar.png")]];
+        topBackground.frame = CGRectMake(0,0,self.frame.size.width,TOP_BAR_HEIGHT);
 	}
 	return topBackground;
 }

@@ -67,6 +67,7 @@ typedef struct TKDateInformation TKDateInformation;
 
 
 - (BOOL) isSameDay:(NSDate*)anotherDate;
+- (BOOL)isSameDay:(NSDate*)anotherDate timeZone:(NSTimeZone *)tz;
 - (int) monthsBetweenDate:(NSDate *)toDate;
 - (NSInteger) daysBetweenDate:(NSDate*)date;
 

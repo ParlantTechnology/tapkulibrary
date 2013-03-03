@@ -28,11 +28,11 @@
  OTHER DEALINGS IN THE SOFTWARE.
  
  */
+#import "Constants.h"
 
 static NSCalendar *gregorian;
 
 #import "NSDate+TKCategory.h"
-
 
 @implementation NSDate (TKCategory)
 
@@ -88,7 +88,16 @@ static NSCalendar *gregorian;
 	NSDateComponents* components1 = [calendar components:(NSYearCalendarUnit | NSMonthCalendarUnit | NSDayCalendarUnit) fromDate:self];
 	NSDateComponents* components2 = [calendar components:(NSYearCalendarUnit | NSMonthCalendarUnit | NSDayCalendarUnit) fromDate:anotherDate];
 	return ([components1 year] == [components2 year] && [components1 month] == [components2 month] && [components1 day] == [components2 day]);
-} 
+}
+
+- (BOOL)isSameDay:(NSDate*)anotherDate timeZone:(NSTimeZone *)tz
+{
+	NSCalendar *calendar = [NSCalendar currentCalendar];
+    [calendar setTimeZone:tz];
+	NSDateComponents* components1 = [calendar components:(NSYearCalendarUnit | NSMonthCalendarUnit | NSDayCalendarUnit) fromDate:self];
+	NSDateComponents* components2 = [calendar components:(NSYearCalendarUnit | NSMonthCalendarUnit | NSDayCalendarUnit) fromDate:anotherDate];
+	return ([components1 year] == [components2 year] && [components1 month] == [components2 month] && [components1 day] == [components2 day]);
+}
 
 - (int) monthsBetweenDate:(NSDate *)toDate{
     if (!gregorian) {        
@@ -162,7 +171,7 @@ static NSCalendar *gregorian;
     if (!gregorian) {        
         gregorian = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
     }
-//	[gregorian setTimeZone:tz];
+	[gregorian setTimeZone:tz];
     
 	NSDateComponents *comp = [gregorian components:(NSMonthCalendarUnit | NSMinuteCalendarUnit | NSYearCalendarUnit | 
 													NSDayCalendarUnit | NSWeekdayCalendarUnit | NSHourCalendarUnit | NSSecondCalendarUnit) 
