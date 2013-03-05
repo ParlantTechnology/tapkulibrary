@@ -198,7 +198,7 @@
 	NSDateFormatter *format = [[NSDateFormatter alloc] init];
     [format setTimeZone:[NSTimeZone timeZoneWithName:@"UTC"]];
 //	[format setDateFormat:@"EEEE  dd MM yyyy"];
-	[format setDateFormat:@"EEEE  MMM d yyyy"];
+	[format setDateFormat:@"EEEE, MMM d yyyy"];
 	NSString *displayDate = [format stringFromDate:_currentDay];
 	self.monthYear.text = displayDate;
 	
