@@ -118,6 +118,7 @@
 	[self addObserver:self forKeyPath: @"currentDay"
 					 options:0
 					 context:@selector(reloadDay)];
+    [self.scrollView scrollRectToVisible:CGRectMake(0, 350, self.scrollView.frame.size.width, self.scrollView.frame.size.height) animated:NO];
 }
 
 #pragma mark -

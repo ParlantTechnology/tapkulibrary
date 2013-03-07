@@ -238,9 +238,9 @@
 	CGFloat h = 44.0f * scale;
 	
 	
-	TKDateInformation todayInfo = [[NSDate date] dateInformation];
+	TKDateInformation todayInfo = [NOW dateInformation];
 	today = dateInfo.month == todayInfo.month && dateInfo.year == todayInfo.year ? todayInfo.day : -5;
-	
+
 	int preDayCnt = [prev daysBetweenDate:_monthDate];
 	if(firstWeekday>1 && sunday){
 		firstOfPrev = preDayCnt - firstWeekday+2;
@@ -376,7 +376,6 @@
 	
 	selectedDay = day;
 	selectedPortion = 1;
-	
 	
 	if(day == today){
 		self.currentDay.shadowOffset = CGSizeMake(0, 1);
@@ -831,10 +830,12 @@
 	return [currentTile monthDate];
 }
 - (void) selectDate:(NSDate*)date{
-	TKDateInformation info = [date dateInformationWithTimeZone:[NSTimeZone timeZoneWithName:@"GMT"]];
+//	TKDateInformation info = [date dateInformationWithTimeZone:[NSTimeZone timeZoneWithName:@"GMT"]];
+	TKDateInformation info = [date dateInformationWithTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 	NSDate *month = [date firstOfMonth];
-	
+	NSLog(@"select Date: %@. info: %i", date, info.day);
 	if([month isEqualToDate:[currentTile monthDate]]){
+        NSLog(@"select day: %i", info.day);
 		[currentTile selectDay:info.day];
 		return;
 	}else {
