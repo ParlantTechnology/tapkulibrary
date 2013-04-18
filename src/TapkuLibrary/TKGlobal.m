@@ -34,6 +34,12 @@
 
 
 + (NSString*) fullBundlePath:(NSString*)bundlePath{
+	if([[UIDevice currentDevice] userInterfaceIdiom] ==UIUserInterfaceIdiomPad)
+    {
+        NSString *ext=[bundlePath pathExtension];
+        NSString *str=[bundlePath stringByDeletingPathExtension];
+        bundlePath=[NSString stringWithFormat:@"%@~ipad.%@",str,ext];
+    }
 	return [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:bundlePath];
 }
 

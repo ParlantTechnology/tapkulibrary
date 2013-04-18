@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1804408E16D2BDE600D6DBEC /* CalendarTableHeader.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1804408D16D2BDE600D6DBEC /* CalendarTableHeader.xib */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
 		2052AF6C168B83C600A49526 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 2052AF6B168B83C600A49526 /* main.m */; };
@@ -80,6 +81,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1804408D16D2BDE600D6DBEC /* CalendarTableHeader.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CalendarTableHeader.xib; sourceTree = "<group>"; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D6058910D05DD3D006BFB54 /* unviersaldemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = unviersaldemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -281,6 +283,7 @@
 		2052AFD3168B855900A49526 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				1804408D16D2BDE600D6DBEC /* CalendarTableHeader.xib */,
 				2052AF72168B83E900A49526 /* CoverflowViewController.h */,
 				2052AF73168B83E900A49526 /* CoverflowViewController.m */,
 				2052AF74168B83E900A49526 /* CalendarMonthViewController.h */,
@@ -436,6 +439,7 @@
 				2052AFCC168B840B00A49526 /* icon_74.png in Resources */,
 				2052AFCD168B840B00A49526 /* launch_iphone-568h@2x.png in Resources */,
 				2052AFCE168B840B00A49526 /* launch_iphone.png in Resources */,
+				1804408E16D2BDE600D6DBEC /* CalendarTableHeader.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

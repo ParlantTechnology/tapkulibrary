@@ -36,7 +36,6 @@
 #import "UIImage+TKCategory.h"
 #import "NSDate+CalendarGrid.h"
 
-
 #pragma mark -
 @interface TKCalendarMonthTiles : UIView {
 	
@@ -51,11 +50,14 @@
 	int selectedDay,selectedPortion;
 	
 	int firstWeekday, daysInMonth;
-
-
+    
+    
 	BOOL startOnSunday;
+    BOOL forIpad;
+    
+    
 }
-
+@property(nonatomic) float tileHeight;
 @property (strong,nonatomic) NSDate *monthDate;
 @property (nonatomic, strong) NSMutableArray *accessibleElements;
 
@@ -78,10 +80,13 @@
 
 #pragma mark -
 @implementation TKCalendarMonthTiles
+@synthesize tileHeight;
 
 
 #define dotFontSize 18.0
 #define dateFontSize 22.0
+#define iPadDotFontSize  20.0
+#define iPadDateFontSize 26.0
 
 #pragma mark Accessibility Container methods
 - (BOOL) isAccessibilityElement{
@@ -89,7 +94,7 @@
 }
 - (NSArray *) accessibleElements{
     if (_accessibleElements!=nil) return _accessibleElements;
-
+    
     _accessibleElements = [[NSMutableArray alloc] init];
 	
 	
@@ -100,16 +105,21 @@
 	[formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 	
 	NSDate *firstDate = [self.datesArray objectAtIndex:0];
-	
+    forIpad=(([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) && (EnableLargeCalendarForIpad==YES))? YES:NO;
 	for(int i=0;i<marks.count;i++){
 		UIAccessibilityElement *element = [[UIAccessibilityElement alloc] initWithAccessibilityContainer:self];
 		
 		NSDate *day = [NSDate dateWithTimeIntervalSinceReferenceDate:[firstDate timeIntervalSinceReferenceDate]+(24*60*60*i)+5];
 		element.accessibilityLabel = [formatter stringForObjectValue:day];
-		
 		CGRect r = [self convertRect:[self rectForCellAtIndex:i] toView:self.window];
-		r.origin.y -= 6;
-		
+        if(forIpad)
+        {
+            r.origin.y -= tileHeightAdjustment;
+		}
+        else
+        {
+            r.origin.y -= 6;
+        }
 		element.accessibilityFrame = r;
 		element.accessibilityTraits = UIAccessibilityTraitButton;
 		element.accessibilityValue = [[marks objectAtIndex:i] boolValue] ? @"Has Events" : @"No Events";
@@ -155,7 +165,7 @@
 		
 		TKDateInformation info2 = [previousMonth dateInformationWithTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 		
-		int preDayCnt = [previousMonth daysBetweenDate:currentMonth];		
+		int preDayCnt = [previousMonth daysBetweenDate:currentMonth];
 		info2.day = preDayCnt - info.weekday + 2;
 		firstDate = [NSDate dateFromDateInformation:info2 timeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 		
@@ -179,11 +189,11 @@
 	
 	
 	
-	int daysInMonth = [currentMonth daysBetweenDate:nextMonth];		
+	int daysInMonth = [currentMonth daysBetweenDate:nextMonth];
 	info.day = daysInMonth;
 	NSDate *lastInMonth = [NSDate dateFromDateInformation:info timeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 	TKDateInformation lastDateInfo = [lastInMonth dateInformationWithTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-
+    
 	
 	
 	if(lastDateInfo.weekday < 7 && sunday){
@@ -196,17 +206,17 @@
 			lastDateInfo.year++;
 		}
 		lastDate = [NSDate dateFromDateInformation:lastDateInfo timeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-	
+        
 	}else if(!sunday && lastDateInfo.weekday != 1){
 		
 		
 		lastDateInfo.day = 8 - lastDateInfo.weekday;
 		lastDateInfo.month++;
 		if(lastDateInfo.month>12){ lastDateInfo.month = 1; lastDateInfo.year++; }
-
+        
 		
 		lastDate = [NSDate dateFromDateInformation:lastDateInfo timeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-
+        
 	}else{
 		lastDate = lastInMonth;
 	}
@@ -217,7 +227,7 @@
 }
 - (id) initWithMonth:(NSDate*)date marks:(NSArray*)markArray startDayOnSunday:(BOOL)sunday{
 	if(!(self=[super initWithFrame:CGRectZero])) return nil;
-
+    forIpad=(([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) && (EnableLargeCalendarForIpad==YES)) ? YES:NO;
 	firstOfPrev = -1;
 	marks = markArray;
 	_monthDate = date;
@@ -235,8 +245,18 @@
 	self.datesArray = dates;
 	NSUInteger numberOfDaysBetween = [[dates objectAtIndex:0] daysBetweenDate:[dates lastObject]];
 	NSUInteger scale = (numberOfDaysBetween / 7) + 1;
-	CGFloat h = 44.0f * scale;
-	
+	CGFloat h ;
+    if(forIpad)
+    {
+        float maxHeightAllowed=CalendarViewHeight-CalendarTopBarHeight;
+        tileHeight= maxHeightAllowed/scale;
+        NSLog(@"tileHeight = %f",tileHeight);
+        h=tileHeight * scale;
+    }
+    else
+    {
+        h=44.0f * scale;
+    }
 	
 	TKDateInformation todayInfo = [NOW dateInformation];
 	today = dateInfo.month == todayInfo.month && dateInfo.year == todayInfo.year ? todayInfo.day : -5;
@@ -254,15 +274,20 @@
 		}
 		lastOfPrev = preDayCnt;
 	}
-	
-	
-	self.frame = CGRectMake(0, 1.0, 320.0f, h+1);
-	
+	if(forIpad)
+    {
+        self.frame = CGRectMake(0, 1.0, tileWidth*7 ,h+1); //CGRectMake(0, 1.0, 640.0f+4.0f+9.0f , (h * 2)+1 );
+        NSLog(@"TKCalendarMonthTiles =%@",NSStringFromCGRect(self.frame));
+    }
+    else
+    {
+        self.frame = CGRectMake(0, 1.0, 320.0f, h+1);
+    }
 	[self.selectedImageView addSubview:self.currentDay];
 	[self.selectedImageView addSubview:self.dot];
 	self.multipleTouchEnabled = NO;
-
-
+    
+    
 	return self;
 }
 - (void) setTarget:(id)t action:(SEL)a{
@@ -275,52 +300,130 @@
 	
 	int row = index / 7;
 	int col = index % 7;
-	
-	return CGRectMake(col*46, row*44+6, 47, 45);
+	if(forIpad)
+    {
+        return CGRectMake(col*tileWidth, row*tileHeight+tileHeightAdjustment, tileWidth, tileHeight);// CGRectMake(col*92, row*88+29, 94, 90);
+    }
+    else{
+        return CGRectMake(col*46, row*44+6, 47, 45);
+    }
 }
-- (void) drawTileInRect:(CGRect)r day:(int)day mark:(BOOL)mark font:(UIFont*)f1 font2:(UIFont*)f2{
+
+- (UIImage *)imageWithColor:(UIColor *)color {
+    CGRect rect = CGRectMake(0.0f, 0.0f, 1.0f, 1.0f);
+    UIGraphicsBeginImageContext(rect.size);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+	
+    CGContextSetFillColorWithColor(context, [color CGColor]);
+    CGContextFillRect(context, rect);
+	
+    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+	
+    return image;
+}
+
+- (void) drawTileInRect:(CGRect)r day:(int)day mark:(CalendarMonthTileMark)mark font:(UIFont*)f1 font2:(UIFont*)f2{
 	
 	NSString *str = [NSString stringWithFormat:@"%d",day];
-	
-	
-	r.size.height -= 2;
+	CGRect rect = r;
+	if (mark==AppointmentMarkBlue) {
+        UIColor *blueColorMark = [UIColor colorWithRed:0 green:.62 blue:.984 alpha:0.5];
+        UIImage *overlayImage=[self imageWithColor:blueColorMark];
+		rect.origin.x += 1;
+        if (forIpad) {
+            rect.origin.y -= tileHeightAdjustment;
+        }
+        else
+        {
+            rect.origin.y -= 6;
+        }
+        
+		rect.size.height -= 1;
+		rect.size.width -= 1;
+		[overlayImage drawInRect:rect];
+	}
+    CGSize expectedLabelSize;
+    if (forIpad) {
+        CGSize maximumSize = CGSizeMake(300, 9999);
+        expectedLabelSize = [str sizeWithFont:f1
+                            constrainedToSize:maximumSize
+                                lineBreakMode:UILineBreakModeWordWrap];
+        r.origin.y -= tileHeightAdjustment;
+        r.origin.y+=(r.size.height-expectedLabelSize.height)/2;
+    }
+    else
+    {
+        r.size.height -= 2;
+    }
 	[str drawInRect: r
 		   withFont: f1
-	  lineBreakMode: UILineBreakModeWordWrap 
+	  lineBreakMode: UILineBreakModeWordWrap
 		  alignment: UITextAlignmentCenter];
 	
 	if(mark){
-		r.size.height = 10;
-		r.origin.y += 18;
-		
+        if(forIpad)
+        {
+            r.size.height = 12;
+            r.origin.y += expectedLabelSize.height + 6;
+		}
+        else
+        {
+            r.size.height = 10;
+            r.origin.y += 18;
+            
+        }
 		[@"•" drawInRect: r
 				withFont: f2
-		   lineBreakMode: UILineBreakModeWordWrap 
+		   lineBreakMode: UILineBreakModeWordWrap
 			   alignment: UITextAlignmentCenter];
 	}
-	
-
-
+    
 }
+
 - (void) drawRect:(CGRect)rect {
 	
 	CGContextRef context = UIGraphicsGetCurrentContext();
 	UIImage *tile = [UIImage imageWithContentsOfFile:TKBUNDLE(@"TapkuLibrary.bundle/Images/calendar/Month Calendar Date Tile.png")];
-	CGRect r = CGRectMake(0, 0, 46, 44);
+	CGRect r;
+    if (forIpad) {
+        r = CGRectMake(0, 0, tileWidth, tileHeight);
+    }
+    else
+    {
+        r = CGRectMake(0, 0, 46, 44);
+    }
 	CGContextDrawTiledImage(context, r, tile.CGImage);
 	
 	if(today > 0){
 		int pre = firstOfPrev > 0 ? lastOfPrev - firstOfPrev + 1 : 0;
 		int index = today +  pre-1;
 		CGRect r =[self rectForCellAtIndex:index];
-		r.origin.y -= 7;
+        if (forIpad) {
+            r.origin.y -= tileHeightAdjustment;
+        }
+        else
+        {
+            r.origin.y -= 7;
+        }
+        
 		[[UIImage imageWithContentsOfFile:TKBUNDLE(@"TapkuLibrary.bundle/Images/calendar/Month Calendar Today Tile.png")] drawInRect:r];
 	}
 	
 	int index = 0;
 	
-	UIFont *font = [UIFont boldSystemFontOfSize:dateFontSize];
-	UIFont *font2 =[UIFont boldSystemFontOfSize:dotFontSize];
+	UIFont *font;
+    UIFont *font2;
+    if (forIpad) {
+        font= [UIFont boldSystemFontOfSize:iPadDateFontSize];
+        font2=[UIFont boldSystemFontOfSize:iPadDotFontSize];
+    }
+    else
+    {
+        font= [UIFont boldSystemFontOfSize:dateFontSize];
+        font2=[UIFont boldSystemFontOfSize:dotFontSize];
+    }
+    
 	UIColor *color = [UIColor grayColor];
 	
 	if(firstOfPrev>0){
@@ -328,9 +431,9 @@
 		for(int i = firstOfPrev;i<= lastOfPrev;i++){
 			r = [self rectForCellAtIndex:index];
 			if ([marks count] > 0)
-				[self drawTileInRect:r day:i mark:[[marks objectAtIndex:index] boolValue] font:font font2:font2];
+				[self drawTileInRect:r day:i mark:[[marks objectAtIndex:index] intValue] font:font font2:font2];
 			else
-				[self drawTileInRect:r day:i mark:NO font:font font2:font2];
+				[self drawTileInRect:r day:i mark:NoAppointmentMark font:font font2:font2];
 			index++;
 		}
 	}
@@ -343,10 +446,10 @@
 		r = [self rectForCellAtIndex:index];
 		if(today == i) [[UIColor whiteColor] set];
 		
-		if ([marks count] > 0) 
-			[self drawTileInRect:r day:i mark:[[marks objectAtIndex:index] boolValue] font:font font2:font2];
+		if ([marks count] > 0)
+			[self drawTileInRect:r day:i mark:[[marks objectAtIndex:index] intValue] font:font font2:font2];
 		else
-			[self drawTileInRect:r day:i mark:NO font:font font2:font2];
+			[self drawTileInRect:r day:i mark:NoAppointmentMark font:font font2:font2];
 		if(today == i) [color set];
 		index++;
 	}
@@ -355,10 +458,10 @@
 	int i = 1;
 	while(index % 7 != 0){
 		r = [self rectForCellAtIndex:index] ;
-		if ([marks count] > 0) 
-			[self drawTileInRect:r day:i mark:[[marks objectAtIndex:index] boolValue] font:font font2:font2];
+		if ([marks count] > 0)
+			[self drawTileInRect:r day:i mark:[[marks objectAtIndex:index] intValue] font:font font2:font2];
 		else
-			[self drawTileInRect:r day:i mark:NO font:font font2:font2];
+			[self drawTileInRect:r day:i mark:NoAppointmentMark font:font font2:font2];
 		i++;
 		index++;
 	}
@@ -387,7 +490,7 @@
 		self.currentDay.shadowOffset = CGSizeMake(0, -1);
 		
 		
-
+        
 		NSString *path = TKBUNDLE(@"TapkuLibrary.bundle/Images/calendar/Month Calendar Date Tile Selected.png");
 		self.selectedImageView.image = [[UIImage imageWithContentsOfFile:path] stretchableImageWithLeftCapWidth:1 topCapHeight:0];
 		markWasOnToday = NO;
@@ -406,7 +509,6 @@
 			[self.dot removeFromSuperview];
 		}
 		
-		
 	}else{
 		[self.dot removeFromSuperview];
 	}
@@ -417,8 +519,16 @@
 	}
 	
 	CGRect r = self.selectedImageView.frame;
-	r.origin.x = (column*46);
-	r.origin.y = (row*44)-1;
+    if (forIpad) {
+        r.origin.x = (column*tileWidth);
+        r.origin.y = (row*tileHeight)-1;
+    }
+    else
+    {
+        r.origin.x = (column*46);
+        r.origin.y = (row*44)-1;
+    }
+    
 	self.selectedImageView.frame = r;
 	
 	
@@ -427,7 +537,6 @@
 }
 - (NSDate*) dateSelected{
 	if(selectedDay < 1 || selectedPortion != 1) return nil;
-	
 	TKDateInformation info = [_monthDate dateInformationWithTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 	info.hour = 0;
 	info.minute = 0;
@@ -435,7 +544,7 @@
 	info.day = selectedDay;
 	NSDate *d = [NSDate dateFromDateInformation:info timeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 	
-		
+    
 	
 	return d;
 	
@@ -445,17 +554,27 @@
 - (void) reactToTouch:(UITouch*)touch down:(BOOL)down{
 	
 	CGPoint p = [touch locationInView:self];
-	if(p.y > self.bounds.size.height || p.y < 0) return;
+	if(p.y > self.bounds.size.height || p.y < 0 || p.x < 0 || p.x > self.bounds.size.width) return;
 	
-	int column = p.x / 46, row = p.y / 44;
+	int column,row;
+    if (forIpad) {
+        column= p.x / tileWidth, row = p.y / tileHeight;
+    }
+    else
+    {
+        column = p.x / 46, row = p.y / 44;
+    }
 	int day = 1, portion = 0;
-	
-	if(row == (int) (self.bounds.size.height / 44)) row --;
-	
+	if (forIpad) {
+        if(row == (int) (self.bounds.size.height / tileHeight)) row --;
+	}
+    else
+    {
+        if(row == (int) (self.bounds.size.height / 44)) row --;
+    }
 	int fir = firstWeekday - 1;
 	if(!startOnSunday && fir == 0) fir = 7;
 	if(!startOnSunday) fir--;
-	
 	
 	if(row==0 && column < fir){
 		day = firstOfPrev + column;
@@ -464,7 +583,7 @@
 		day = row * 7 + column  - firstWeekday+2;
 		if(!startOnSunday) day++;
 		if(!startOnSunday && fir==6) day -= 7;
-
+        
 	}
 	if(portion > 0 && day > daysInMonth){
 		portion = 2;
@@ -503,14 +622,20 @@
 		[self.dot removeFromSuperview];
 	}
 	
-
+    
 	
 	
 	CGRect r = self.selectedImageView.frame;
-	r.origin.x = (column*46);
-	r.origin.y = (row*44)-1;
+    if (forIpad) {
+     	r.origin.x = (column*tileWidth)+1;
+        r.origin.y = (row*tileHeight)-1;
+    }
+    else
+    {
+        r.origin.x = (column*46);
+        r.origin.y = (row*44)-1;
+    }
 	self.selectedImageView.frame = r;
-	
 	if(day == selectedDay && selectedPortion == portion) return;
 	
 	
@@ -530,7 +655,7 @@
 - (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event{
 	//[super touchesBegan:touches withEvent:event];
 	[self reactToTouch:[touches anyObject] down:NO];
-} 
+}
 - (void) touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event{
 	[self reactToTouch:[touches anyObject] down:NO];
 }
@@ -556,8 +681,15 @@
 - (UILabel *) dot{
 	if(_dot==nil){
 		CGRect r = self.selectedImageView.bounds;
-		r.origin.y += 29;
-		r.size.height -= 31;
+        if (forIpad) {
+            r.origin.y += (r.size.height/2)+25;
+            r.size.height = 12;
+        }
+        else
+        {
+            r.origin.y += 29;
+            r.size.height -= 31;
+        }
 		_dot = [[UILabel alloc] initWithFrame:r];
 		_dot.text = @"•";
 		_dot.textColor = [UIColor whiteColor];
@@ -574,7 +706,13 @@
 		NSString *path = TKBUNDLE(@"TapkuLibrary.bundle/Images/calendar/Month Calendar Date Tile Selected.png");
 		UIImage *img = [[UIImage imageWithContentsOfFile:path] stretchableImageWithLeftCapWidth:1 topCapHeight:0];
 		_selectedImageView = [[UIImageView alloc] initWithImage:img];
-		_selectedImageView.frame = CGRectMake(0, 0, 47, 45);
+        if (forIpad) {
+            _selectedImageView.frame = CGRectMake(0, 0, tileWidth, tileHeight);
+        }
+        else
+        {
+            _selectedImageView.frame = CGRectMake(0, 0, 47, 45);
+        }
 	}
 	return _selectedImageView;
 }
@@ -603,17 +741,25 @@
 }
 - (id) initWithSundayAsFirst:(BOOL)s{
 	if (!(self = [super initWithFrame:CGRectZero])) return nil;
-	self.backgroundColor = [UIColor grayColor];
-
+	self.backgroundColor = [UIColor lightGrayColor];
 	sunday = s;
+	forIpad= (([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) && (EnableLargeCalendarForIpad==YES))? YES :NO;
 	currentTile = [[TKCalendarMonthTiles alloc] initWithMonth:[NOW firstOfMonth] marks:nil startDayOnSunday:sunday];
 	[currentTile setTarget:self action:@selector(tile:)];
-	
-	CGRect r = CGRectMake(0, 0, self.tileBox.bounds.size.width, self.tileBox.bounds.size.height + self.tileBox.frame.origin.y);
+	tileHeight=[currentTile tileHeight];
+	CGRect r;
+    if (forIpad) {
+        r= CGRectMake(0, 0, self.tileBox.bounds.size.width+4, self.tileBox.bounds.size.height + self.tileBox.frame.origin.y);
+    }
+    else
+    {
+        r= CGRectMake(0, 0, self.tileBox.bounds.size.width, self.tileBox.bounds.size.height + self.tileBox.frame.origin.y);
+    }
+    
 	self.frame = r;
 	
 	[self addSubview:self.topBackground];
-	self.topBackground.frame = CGRectMake(0, 0, self.bounds.size.width, self.topBackground.frame.size.height);
+	self.topBackground.frame = CGRectMake(0, 0, self.bounds.size.width, CalendarTopBarHeight);
 	[self.tileBox addSubview:currentTile];
 	[self addSubview:self.tileBox];
 	
@@ -671,7 +817,15 @@
 	
 	int i = 0;
 	for(NSString *s in ar){
-		UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(46 * i, 29, 46, 15)];
+		UILabel *label ;
+        if (forIpad) {
+            label= [[UILabel alloc] initWithFrame:CGRectMake(tileWidth * i, 62, tileWidth, 15)];
+        }
+        else
+        {
+            label = [[UILabel alloc] initWithFrame:CGRectMake(46 * i, 29, 46, 15)];
+        }
+        
 		[self addSubview:label];
         
         //Added Accessibility Labels
@@ -695,7 +849,14 @@
 		label.textAlignment = UITextAlignmentCenter;
 		label.shadowColor = [UIColor whiteColor];
 		label.shadowOffset = CGSizeMake(0, 1);
-		label.font = [UIFont systemFontOfSize:11];
+        if (forIpad) {
+            label.font = [UIFont systemFontOfSize:18];
+        }
+        else
+        {
+            label.font = [UIFont systemFontOfSize:11];
+        }
+        
 		label.backgroundColor = [UIColor clearColor];
 		label.textColor = [UIColor colorWithRed:59/255. green:73/255. blue:88/255. alpha:1];
 		i++;
@@ -734,9 +895,22 @@
 	int overlap =  0;
 	
 	if(isNext){
-		overlap = [newTile.monthDate isEqualToDate:[dates objectAtIndex:0]] ? 0 : 44;
+        if (forIpad) {
+            overlap = [newTile.monthDate isEqualToDate:[dates objectAtIndex:0]] ? 0 : tileHeight;
+        }
+        else
+        {
+            overlap = [newTile.monthDate isEqualToDate:[dates objectAtIndex:0]] ? 0 : 44;
+        }
+		
 	}else{
-		overlap = [currentTile.monthDate compare:[dates lastObject]] !=  NSOrderedDescending ? 44 : 0;
+        if (forIpad) {
+            overlap = [currentTile.monthDate compare:[dates lastObject]] !=  NSOrderedDescending ? tileHeight : 0;
+        }
+        else
+        {
+            overlap = [currentTile.monthDate compare:[dates lastObject]] !=  NSOrderedDescending ? 44 : 0;
+        }
 	}
 	
 	float y = isNext ? currentTile.bounds.size.height - overlap : newTile.bounds.size.height * -1 + overlap +2;
@@ -749,7 +923,7 @@
 	[UIView beginAnimations:nil context:nil];
 	[UIView setAnimationDuration:0.1];
 	newTile.alpha = 1;
-
+    
 	[UIView commitAnimations];
 	
 	
@@ -797,25 +971,25 @@
 	_monthYear.text = [localNextMonth monthYearString];
 	
 	
-
+    
 }
 - (void) changeMonth:(UIButton *)sender{
 	
 	NSDate *newDate = [self dateForMonthChange:sender];
-	if ([self.delegate respondsToSelector:@selector(calendarMonthView:monthShouldChange:animated:)] && ![self.delegate calendarMonthView:self monthShouldChange:newDate animated:YES] ) 
+	if ([self.delegate respondsToSelector:@selector(calendarMonthView:monthShouldChange:animated:)] && ![self.delegate calendarMonthView:self monthShouldChange:newDate animated:YES] )
 		return;
 	
 	
-	if ([self.delegate respondsToSelector:@selector(calendarMonthView:monthWillChange:animated:)] ) 
+	if ([self.delegate respondsToSelector:@selector(calendarMonthView:monthWillChange:animated:)] )
 		[self.delegate calendarMonthView:self monthWillChange:newDate animated:YES];
 	
-
+    
 	
 	
 	[self changeMonthAnimation:sender];
 	if([self.delegate respondsToSelector:@selector(calendarMonthView:monthDidChange:animated:)])
 		[self.delegate calendarMonthView:self monthDidChange:currentTile.monthDate animated:YES];
-
+    
 }
 - (void) animationEnded{
 	self.userInteractionEnabled = YES;
@@ -849,16 +1023,23 @@
 		
 		NSArray *dates = [TKCalendarMonthTiles rangeOfDatesInMonthGrid:month startOnSunday:sunday];
 		NSArray *data = [self.dataSource calendarMonthView:self marksFromDate:[dates objectAtIndex:0] toDate:[dates lastObject]];
-		TKCalendarMonthTiles *newTile = [[TKCalendarMonthTiles alloc] initWithMonth:month 
-																			  marks:data 
+		TKCalendarMonthTiles *newTile = [[TKCalendarMonthTiles alloc] initWithMonth:month
+																			  marks:data
 																   startDayOnSunday:sunday];
 		[newTile setTarget:self action:@selector(tile:)];
 		[currentTile removeFromSuperview];
 		currentTile = newTile;
 		[self.tileBox addSubview:currentTile];
-		self.tileBox.frame = CGRectMake(0, 44, newTile.frame.size.width, newTile.frame.size.height);
-		self.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, self.bounds.size.width, self.tileBox.frame.size.height+self.tileBox.frame.origin.y);
+        if (forIpad) {
+            self.tileBox.frame = CGRectMake(0, CalendarTopBarHeight, newTile.frame.size.width, newTile.frame.size.height);
+        }
+        else
+        {
+            self.tileBox.frame = CGRectMake(0, 44, newTile.frame.size.width, newTile.frame.size.height);
+        }
 
+		self.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, self.bounds.size.width, self.tileBox.frame.size.height+self.tileBox.frame.origin.y);
+        
 		self.shadow.frame = CGRectMake(0, self.frame.size.height-self.shadow.frame.size.height+21, self.shadow.frame.size.width, self.shadow.frame.size.height);
 		self.monthYear.text = [date monthYearString];
 		[currentTile selectDay:info.day];
@@ -888,7 +1069,7 @@
 		
 		if([self.delegate respondsToSelector:@selector(calendarMonthView:didSelectDate:)])
 			[self.delegate calendarMonthView:self didSelectDate:[self dateSelected]];
-	
+        
 	}else{
 		
 		int direction = [[ar lastObject] intValue];
@@ -898,7 +1079,7 @@
 		if ([self.delegate respondsToSelector:@selector(calendarMonthView:monthShouldChange:animated:)] && ![self.delegate calendarMonthView:self monthShouldChange:newMonth animated:YES])
 			return;
 		
-		if ([self.delegate respondsToSelector:@selector(calendarMonthView:monthWillChange:animated:)])					
+		if ([self.delegate respondsToSelector:@selector(calendarMonthView:monthWillChange:animated:)])
 			[self.delegate calendarMonthView:self monthWillChange:newMonth animated:YES];
 		
 		
@@ -906,13 +1087,13 @@
 		[self changeMonthAnimation:b];
 		
 		int day = [[ar objectAtIndex:0] intValue];
-
-	
+        
+        
 		// thanks rafael
 		TKDateInformation info = [[currentTile monthDate] dateInformationWithTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 		info.day = day;
         
-        NSDate *dateForMonth = [NSDate dateFromDateInformation:info  timeZone:[NSTimeZone timeZoneWithName:@"GMT"]]; 
+        NSDate *dateForMonth = [NSDate dateFromDateInformation:info  timeZone:[NSTimeZone timeZoneWithName:@"GMT"]];
 		[currentTile selectDay:day];
 		
 		
@@ -921,7 +1102,7 @@
 		
 		if([self.delegate respondsToSelector:@selector(calendarMonthView:monthDidChange:animated:)])
 			[self.delegate calendarMonthView:self monthDidChange:dateForMonth animated:YES];
-
+        
 		
 	}
 	
@@ -936,7 +1117,13 @@
 }
 - (UILabel *) monthYear{
 	if(_monthYear==nil){
-		_monthYear = [[UILabel alloc] initWithFrame:CGRectInset(CGRectMake(0, 0, self.tileBox.frame.size.width, 38), 40, 6)];
+        if (forIpad) {
+            _monthYear = [[UILabel alloc] initWithFrame:CGRectInset(CGRectMake(0, 15, self.tileBox.frame.size.width, 38), 40, 6)];
+        }
+        else
+        {
+            _monthYear = [[UILabel alloc] initWithFrame:CGRectInset(CGRectMake(0, 0, self.tileBox.frame.size.width, 38), 40, 6)];
+        }
 		_monthYear.textAlignment = UITextAlignmentCenter;
 		_monthYear.backgroundColor = [UIColor clearColor];
 		_monthYear.font = [UIFont boldSystemFontOfSize:22];
@@ -951,7 +1138,14 @@
         _leftArrow.accessibilityLabel = @"Previous Month";
 		[_leftArrow addTarget:self action:@selector(changeMonth:) forControlEvents:UIControlEventTouchUpInside];
 		[_leftArrow setImage:[UIImage imageNamedTK:@"TapkuLibrary.bundle/Images/calendar/Month Calendar Left Arrow"] forState:0];
-		_leftArrow.frame = CGRectMake(0, 0, 48, 38);
+        if (forIpad) {
+            _leftArrow.frame = CGRectMake(24, 15, 48, 38);
+        }
+        else
+        {
+            _leftArrow.frame = CGRectMake(0, 0, 48, 38);
+        }
+        
 	}
 	return _leftArrow;
 }
@@ -961,14 +1155,27 @@
 		_rightArrow.tag = 1;
         _rightArrow.accessibilityLabel = @"Next Month";
 		[_rightArrow addTarget:self action:@selector(changeMonth:) forControlEvents:UIControlEventTouchUpInside];
-		_rightArrow.frame = CGRectMake(320-45, 0, 48, 38);
+        if (forIpad) {
+            _rightArrow.frame = CGRectMake(self.tileBox.frame.size.width-74, 15, 48, 38);
+        }
+        else
+        {
+            _rightArrow.frame = CGRectMake(320-45, 0, 48, 38);
+        }
+        
 		[_rightArrow setImage:[UIImage imageNamedTK:@"TapkuLibrary.bundle/Images/calendar/Month Calendar Right Arrow"] forState:0];
 	}
 	return _rightArrow;
 }
 - (UIView *) tileBox{
 	if(_tileBox==nil){
-		_tileBox = [[UIView alloc] initWithFrame:CGRectMake(0, 44, 320, currentTile.frame.size.height)];
+        if (forIpad) {
+            _tileBox = [[UIView alloc] initWithFrame:CGRectMake(1, CalendarTopBarHeight, currentTile.frame.size.width, currentTile.frame.size.height)];
+        }
+        else
+        {
+            _tileBox = [[UIView alloc] initWithFrame:CGRectMake(0, 44, 320, currentTile.frame.size.height)];
+        }
 		_tileBox.clipsToBounds = YES;
 	}
 	return _tileBox;

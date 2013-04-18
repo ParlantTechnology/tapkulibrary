@@ -29,22 +29,35 @@
  
  */
 
+/***** Macros for ipad calendar rendering *********/
+#define tileWidth 109
+#define tileHeightAdjustment 28
+#define CalendarViewHeight 653
+#define CalendarTopBarHeight  90
+#define EnableLargeCalendarForIpad YES
+
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-
 
 @class TKCalendarMonthTiles;
 @protocol TKCalendarMonthViewDelegate, TKCalendarMonthViewDataSource;
 
+typedef enum tilemark
+{
+    NoAppointmentMark=0,
+    AppointmentMarkBlue
+} CalendarMonthTileMark;
+
 /** `TKCalendarMonthView` imitates the month grid in the Calendar app on iPhone. */
 @interface TKCalendarMonthView : UIView {
-
+    
 	TKCalendarMonthTiles *currentTile,*oldTile;
 	//UIButton *leftArrow, *rightArrow;
 	//UIImageView *topBackground, *shadow;
 	//UILabel *monthYear;
 	BOOL sunday;
-
+    BOOL forIpad;
+    float tileHeight;
 }
 
 
@@ -66,12 +79,12 @@
 - (NSDate*) dateSelected;
 
 
-/** The current month date being displayed. 
+/** The current month date being displayed.
  @return An `NSDate` object set to the month and year of the current month grid.
  */
 - (NSDate*) monthDate;
 
-/** Selects a specific date in the month grid. 
+/** Selects a specific date in the month grid.
  @param date The date that will be highlighed.
  */
 - (void) selectDate:(NSDate*)date;
@@ -81,14 +94,14 @@
 
 @end
 
-/** The delegate of a `TKCalendarMonthView` object must adopt the `TKCalendarMonthViewDelegate` protocol. */ 
+/** The delegate of a `TKCalendarMonthView` object must adopt the `TKCalendarMonthViewDelegate` protocol. */
 @protocol TKCalendarMonthViewDelegate <NSObject>
 @optional
 
 /** The highlighed date changed.
  @param monthView The calendar month view.
  @param date The highlighted date.
- */ 
+ */
 - (void) calendarMonthView:(TKCalendarMonthView*)monthView didSelectDate:(NSDate*)date;
 
 
@@ -97,26 +110,26 @@
  @param month The month date.
  @param animated Animation flag
  @return YES if the month should change. NO otherwise
- */ 
+ */
 - (BOOL) calendarMonthView:(TKCalendarMonthView*)monthView monthShouldChange:(NSDate*)month animated:(BOOL)animated;
 
 /** The calendar will change the current month to grid shown.
  @param monthView The calendar month view.
  @param month The month date.
  @param animated Animation flag
- */ 
+ */
 - (void) calendarMonthView:(TKCalendarMonthView*)monthView monthWillChange:(NSDate*)month animated:(BOOL)animated;
 
 /** The calendar did change the current month to grid shown.
  @param monthView The calendar month view.
  @param month The month date.
  @param animated Animation flag
- */ 
+ */
 - (void) calendarMonthView:(TKCalendarMonthView*)monthView monthDidChange:(NSDate*)month animated:(BOOL)animated;
 @end
 
 
-/** The data source of a `TKCalendarMonthView` object must adopt the `TKCalendarMonthViewDataSource` protocol. */ 
+/** The data source of a `TKCalendarMonthView` object must adopt the `TKCalendarMonthViewDataSource` protocol. */
 @protocol TKCalendarMonthViewDataSource <NSObject>
 
 /** A data source that will correspond to marks for the calendar month grid for a particular month.
