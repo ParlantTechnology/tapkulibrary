@@ -28,7 +28,7 @@
  OTHER DEALINGS IN THE SOFTWARE.
  
  */
-#import "Constants.h"
+#import "TapkuLibrary.h"
 
 #import "TKCalendarMonthView.h"
 #import "NSDate+TKCategory.h"
@@ -238,7 +238,7 @@
 	CGFloat h = 44.0f * scale;
 	
 	
-	TKDateInformation todayInfo = [NOW() dateInformation];
+	TKDateInformation todayInfo = [[TapkuLibrary now] dateInformation];
 	today = dateInfo.month == todayInfo.month && dateInfo.year == todayInfo.year ? todayInfo.day : -5;
 
 	int preDayCnt = [prev daysBetweenDate:_monthDate];
@@ -606,7 +606,7 @@
 	self.backgroundColor = [UIColor grayColor];
 
 	sunday = s;
-	currentTile = [[TKCalendarMonthTiles alloc] initWithMonth:[NOW() firstOfMonth] marks:nil startDayOnSunday:sunday];
+	currentTile = [[TKCalendarMonthTiles alloc] initWithMonth:[[TapkuLibrary now] firstOfMonth] marks:nil startDayOnSunday:sunday];
 	[currentTile setTarget:self action:@selector(tile:)];
 	
 	CGRect r = CGRectMake(0, 0, self.tileBox.bounds.size.width, self.tileBox.bounds.size.height + self.tileBox.frame.origin.y);
@@ -617,7 +617,7 @@
 	[self.tileBox addSubview:currentTile];
 	[self addSubview:self.tileBox];
 	
-	NSDate *date = NOW();
+	NSDate *date = [TapkuLibrary now];
 	self.monthYear.text = [date monthYearString];
 	[self addSubview:self.monthYear];
 	

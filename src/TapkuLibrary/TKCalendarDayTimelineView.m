@@ -27,7 +27,7 @@
  OTHER DEALINGS IN THE SOFTWARE.
  
  */
-#import "Constants.h"
+#import "TapkuLibrary.h"
 
 #import "TKCalendarDayTimelineView.h"
 #import "NSDate+TKCategory.h"
@@ -186,7 +186,7 @@
 	// Make it today
 	if (!self.currentDay) {
 		// Dont' want to inform the observer
-		_currentDay = NOW();
+		_currentDay = [TapkuLibrary now];
 	}
 	
 	// Remove all previous view event
