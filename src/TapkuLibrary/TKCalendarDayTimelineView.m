@@ -94,6 +94,11 @@
     return self;
 }
 
+- (void)scrollToTime:(float)hour exact:(BOOL)exact animated:(BOOL)animated
+{
+    [self.scrollView scrollRectToVisible:CGRectMake(0, hour * 50 + (exact ? 12.5 : 0), self.scrollView.frame.size.width, self.scrollView.frame.size.height) animated:animated];
+}
+
 - (void)setupCustomInitialisation
 {
 	// Initialization code
@@ -118,7 +123,33 @@
 	[self addObserver:self forKeyPath: @"currentDay"
 					 options:0
 					 context:@selector(reloadDay)];
-    [self.scrollView scrollRectToVisible:CGRectMake(0, 350, self.scrollView.frame.size.width, self.scrollView.frame.size.height) animated:NO];
+    
+    UISwipeGestureRecognizer * leftSwiper = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(userSwiped:)];
+    UISwipeGestureRecognizer * rightSwiper = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(userSwiped:)];
+    leftSwiper.direction = UISwipeGestureRecognizerDirectionLeft;
+    rightSwiper.direction = UISwipeGestureRecognizerDirectionRight;
+    
+    [self.scrollView addGestureRecognizer:leftSwiper];
+    [self.scrollView addGestureRecognizer:rightSwiper];
+}
+
+- (void)userSwiped:(UISwipeGestureRecognizer *)swiper
+{
+    UISwipeGestureRecognizerDirection direction = swiper.direction;
+    switch (direction) {
+        case UISwipeGestureRecognizerDirectionLeft:
+            if (!self.rightArrow.hidden) {
+                [self nextDay:swiper];
+            }
+            break;
+        case UISwipeGestureRecognizerDirectionRight:
+            if (!self.leftArrow.hidden) {
+                [self previousDay:swiper];
+            }
+            break;
+        default:
+            return;
+    }
 }
 
 #pragma mark -
@@ -187,6 +218,24 @@
 	if (!self.currentDay) {
 		// Dont' want to inform the observer
 		_currentDay = [TapkuLibrary now];
+        
+        // Clamp between min/max if provided
+        if ([self.delegate respondsToSelector:@selector(minimumDateForCalendarDayTimelineView:)]) {
+            NSDate * minimum = [self.delegate minimumDateForCalendarDayTimelineView:self];
+            NSDate * later = [_currentDay laterDate:minimum];
+            if ([later isSameDay:minimum]) {
+                // Minimum is after today
+                _currentDay = minimum;
+            }
+        }
+        if ([self.delegate respondsToSelector:@selector(maximumDateForCalendarDayTimelineView:)]) {
+            NSDate * maximum = [self.delegate maximumDateForCalendarDayTimelineView:self];
+            NSDate * earlier = [_currentDay earlierDate:maximum];
+            if ([earlier isSameDay:maximum]) {
+                // Maximum is before today
+                _currentDay = maximum;
+            }
+        }
 	}
 	
 	// Remove all previous view event
@@ -197,7 +246,8 @@
 	}
 	
 	NSDateFormatter *format = [[NSDateFormatter alloc] init];
-    [format setTimeZone:[NSTimeZone timeZoneWithName:@"UTC"]];
+    NSTimeZone * timezone = [NSTimeZone timeZoneForSecondsFromGMT:0];
+    [format setTimeZone:timezone];
 //	[format setDateFormat:@"EEEE  dd MM yyyy"];
 	[format setDateFormat:@"EEEE, MMM d yyyy"];
 	NSString *displayDate = [format stringFromDate:_currentDay];
@@ -216,11 +266,12 @@
 		//starting point to check if they match
 		CGFloat startMarker = 0.0f;
 		CGFloat endMarker = 0.0f;
+        BOOL hasScrolledToFirstEvent = NO;
 		for (TKCalendarDayEventView *event in self.events) {
 			// Making sure delgate sending date that match current day
-			if ([event.startDate isSameDay:self.currentDay timeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]]) {
+			if ([event.startDate isSameDay:self.currentDay timeZone:timezone]) {
 				// Get the hour start position
-				NSInteger hourStart = [event.startDate dateInformationWithTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]].hour;
+				NSInteger hourStart = [event.startDate dateInformationWithTimeZone:timezone].hour;
 				CGFloat hourStartPosition = roundf((hourStart * VERTICAL_DIFF) + VERTICAL_OFFSET + ((FONT_SIZE + 4.0) / 2.0));
 				// Get the minute start position
 				// Round minute to each 5
@@ -231,14 +282,14 @@
 				
 				
 				// Get the hour end position
-				NSInteger hourEnd = [event.endDate dateInformationWithTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]].hour;
+				NSInteger hourEnd = [event.endDate dateInformationWithTimeZone:timezone].hour;
 				if (![event.startDate isSameDay:event.endDate]) {
 					hourEnd = 23;
 				}
 				CGFloat hourEndPosition = roundf((hourEnd * VERTICAL_DIFF) + VERTICAL_OFFSET + ((FONT_SIZE + 4.0) / 2.0));
 				// Get the minute end position
 				// Round minute to each 5
-				NSInteger minuteEnd = [event.endDate dateInformationWithTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]].minute;
+				NSInteger minuteEnd = [event.endDate dateInformationWithTimeZone:timezone].minute;
 				if (![event.startDate isSameDay:event.endDate]) {
 					minuteEnd = 55;
 				}
@@ -295,9 +346,28 @@
 				[sameTimeEvents addObject:event];
 				// Log the extracted date values
 //				NSLog(@"hourStart: %d minuteStart: %d", hourStart, minuteStart);
+                
+                if (!hasScrolledToFirstEvent) {
+                    [self scrollToTime:((float)hourStart + (float)minuteStart/60.0) - 0.5 exact:YES animated:NO];
+                    hasScrolledToFirstEvent = YES;
+                }
 			}
 		}
-	}	
+        if (!hasScrolledToFirstEvent) {
+            [self scrollToTime:7 exact:NO animated:NO];
+        }
+	}
+    
+    if (self.delegate && [self.delegate respondsToSelector:@selector(minimumDateForCalendarDayTimelineView:)]) {
+        // If today is the earliest day, hide the left arrow
+        NSInteger days = [self.currentDay daysBetweenDate:[self.delegate minimumDateForCalendarDayTimelineView:self]];
+        [self.leftArrow setHidden:days == 0];
+    }
+    if (self.delegate && [self.delegate respondsToSelector:@selector(maximumDateForCalendarDayTimelineView:)]) {
+        // If today is the latest day, hide the right arrow
+        NSInteger days = [self.currentDay daysBetweenDate:[self.delegate maximumDateForCalendarDayTimelineView:self]];
+        [self.rightArrow setHidden:days == 0];
+    }
 }
 
 #pragma mark -
@@ -370,11 +440,19 @@
 -(void) nextDay:(id)sender {
 	NSDate *tomorrow = [self.currentDay dateByAddingDays:1];
 	self.currentDay = tomorrow;
+    
+    if (self.delegate && [self.delegate respondsToSelector:@selector(calendarDayTimelineView:changedToDate:)]) {
+        [self.delegate calendarDayTimelineView:self changedToDate:self.currentDay];
+    }
 }
 
 -(void) previousDay:(id)sender {
 	NSDate *yesterday = [self.currentDay dateByAddingDays:-1];
 	self.currentDay = yesterday;
+    
+    if (self.delegate && [self.delegate respondsToSelector:@selector(calendarDayTimelineView:changedToDate:)]) {
+        [self.delegate calendarDayTimelineView:self changedToDate:self.currentDay];
+    }
 }
 
 - (UIButton *) leftArrow{

@@ -49,7 +49,7 @@
 	//montagem da barra superior de seleção de dias 
 	UIButton *leftArrow, *rightArrow;
 	UIImageView *topBackground, *shadow;
-	UILabel *monthYear;	
+	UILabel *monthYear;
 }
 
 @property (unsafe_unretained, nonatomic, readonly) UIScrollView *scrollView;
@@ -81,13 +81,18 @@
 - (void) calendarDayTimelineView:(TKCalendarDayTimelineView*)calendarDayTimeline eventViewWasSelected:(TKCalendarDayEventView *)eventView;
 - (void) calendarDayTimelineView:(TKCalendarDayTimelineView*)calendarDayTimeline eventDateWasSelected:(NSDate*)eventDate;
 
+- (void) calendarDayTimelineView:(TKCalendarDayTimelineView*)calendarDayTimeline changedToDate:(NSDate*)date;
+
+- (NSDate *) minimumDateForCalendarDayTimelineView:(TKCalendarDayTimelineView*)calendarDayTimeline;
+- (NSDate *) maximumDateForCalendarDayTimelineView:(TKCalendarDayTimelineView*)calendarDayTimeline;
+
 @end
 
 @interface TKTimelineView : TapDetectingView {
 	NSArray *_times;
 	NSArray *_periods;
 	BOOL is24hClock;
-	UIColor *hourColor;	
+	UIColor *hourColor;
 }
 
 @property (nonatomic, readonly) NSArray *times;
