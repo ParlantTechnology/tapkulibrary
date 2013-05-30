@@ -27,7 +27,7 @@
  OTHER DEALINGS IN THE SOFTWARE.
  
  */
-#import "Constants.h"
+#import "TapkuLibrary.h"
 
 #import "TKCalendarDayViewController.h"
 #import "TKCalendarDayEventView.h"
@@ -60,15 +60,15 @@
 - (NSArray *)calendarDayTimelineView:(TKCalendarDayTimelineView*)calendarDayTimeline eventsForDate:(NSDate *)eventDate{
 	TKCalendarDayEventView *eventViewFirst = [TKCalendarDayEventView eventViewWithFrame:CGRectZero
 																		 id:nil 
-																  startDate:[NOW() dateByAddingTimeInterval:60 * 60 * 2]
-																	endDate:[NOW() dateByAddingTimeInterval:60 * 60 * 24]
+																  startDate:[[TapkuLibrary now] dateByAddingTimeInterval:60 * 60 * 2]
+																	endDate:[[TapkuLibrary now] dateByAddingTimeInterval:60 * 60 * 24]
 																	  title:@"First"
 																   location:@"Test Location"];
 	
 	TKCalendarDayEventView *eventViewSecond = [TKCalendarDayEventView eventViewWithFrame:CGRectZero
 																				  id:nil
-															 			   startDate:NOW()
-																			 endDate:NOW()
+															 			   startDate:[TapkuLibrary now]
+																			 endDate:[TapkuLibrary now]
 																			   title:@"Second ultra mega hypra long text to test again with more"
 																		    location:nil];
 	

@@ -87,3 +87,9 @@
 
 // Coverflow
 #import "TKCoverflowView.h"
+
+@interface TapkuLibrary : NSObject
+@property (nonatomic, strong) NSDate * (^nowBlock)();
++ (TapkuLibrary *)sharedObject;
++ (NSDate *)now;
+@end

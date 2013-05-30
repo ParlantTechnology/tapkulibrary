@@ -28,21 +28,21 @@
  OTHER DEALINGS IN THE SOFTWARE.
  
  */
-#import "Constants.h"
 
 static NSCalendar *gregorian;
 
 #import "NSDate+TKCategory.h"
+#import "TapkuLibrary.h"
 
 @implementation NSDate (TKCategory)
 
 + (NSDate*) yesterday{
-	TKDateInformation inf = [NOW() dateInformation];
+	TKDateInformation inf = [[TapkuLibrary now] dateInformation];
 	inf.day--;
 	return [NSDate dateFromDateInformation:inf];
 }
 + (NSDate*) month{
-    return [NOW() monthDate];
+    return [[TapkuLibrary now] monthDate];
 }
 
 - (NSDate*) monthDate {
@@ -122,7 +122,7 @@ static NSCalendar *gregorian;
 }
 
 - (BOOL) isToday{
-	return [self isSameDay:NOW()];
+	return [self isSameDay:[TapkuLibrary now]];
 } 
 
 
@@ -226,7 +226,7 @@ static NSCalendar *gregorian;
     }
 // !!!: commented out in current
 	[gregorian setTimeZone:tz];
-	NSDateComponents *comp = [gregorian components:(NSYearCalendarUnit | NSMonthCalendarUnit) fromDate:NOW()];
+	NSDateComponents *comp = [gregorian components:(NSYearCalendarUnit | NSMonthCalendarUnit) fromDate:[TapkuLibrary now]];
 	
 	[comp setDay:info.day];
 	[comp setMonth:info.month];
@@ -245,7 +245,7 @@ static NSCalendar *gregorian;
         gregorian = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
     }
     [gregorian setTimeZone:[NSTimeZone systemTimeZone]];
-	NSDateComponents *comp = [gregorian components:(NSYearCalendarUnit | NSMonthCalendarUnit) fromDate:NOW()];
+	NSDateComponents *comp = [gregorian components:(NSYearCalendarUnit | NSMonthCalendarUnit) fromDate:[TapkuLibrary now]];
 	
 	[comp setDay:info.day];
 	[comp setMonth:info.month];
