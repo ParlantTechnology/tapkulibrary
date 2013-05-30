@@ -327,7 +327,7 @@
 	
 	NSString *str = [NSString stringWithFormat:@"%d",day];
 	CGRect rect = r;
-	if (mark==AppointmentMarkBlue) {
+	if (NO && mark==AppointmentMarkBlue) {
         UIColor *blueColorMark = [UIColor colorWithRed:0 green:.62 blue:.984 alpha:0.5];
         UIImage *overlayImage=[self imageWithColor:blueColorMark];
 		rect.origin.x += 1;
@@ -671,7 +671,7 @@
 		_currentDay.text = @"1";
 		_currentDay.textColor = [UIColor whiteColor];
 		_currentDay.backgroundColor = [UIColor clearColor];
-		_currentDay.font = [UIFont boldSystemFontOfSize:dateFontSize];
+		_currentDay.font = [UIFont boldSystemFontOfSize:forIpad ? iPadDateFontSize : dateFontSize];
 		_currentDay.textAlignment = UITextAlignmentCenter;
 		_currentDay.shadowColor = [UIColor darkGrayColor];
 		_currentDay.shadowOffset = CGSizeMake(0, -1);
