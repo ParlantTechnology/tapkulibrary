@@ -37,12 +37,12 @@ static NSCalendar *gregorian;
 @implementation NSDate (TKCategory)
 
 + (NSDate*) yesterday{
-	TKDateInformation inf = [NOW dateInformation];
+	TKDateInformation inf = [NOW() dateInformation];
 	inf.day--;
 	return [NSDate dateFromDateInformation:inf];
 }
 + (NSDate*) month{
-    return [NOW monthDate];
+    return [NOW() monthDate];
 }
 
 - (NSDate*) monthDate {
@@ -122,7 +122,7 @@ static NSCalendar *gregorian;
 }
 
 - (BOOL) isToday{
-	return [self isSameDay:NOW];
+	return [self isSameDay:NOW()];
 } 
 
 
@@ -226,7 +226,7 @@ static NSCalendar *gregorian;
     }
 // !!!: commented out in current
 	[gregorian setTimeZone:tz];
-	NSDateComponents *comp = [gregorian components:(NSYearCalendarUnit | NSMonthCalendarUnit) fromDate:NOW];
+	NSDateComponents *comp = [gregorian components:(NSYearCalendarUnit | NSMonthCalendarUnit) fromDate:NOW()];
 	
 	[comp setDay:info.day];
 	[comp setMonth:info.month];
@@ -245,7 +245,7 @@ static NSCalendar *gregorian;
         gregorian = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
     }
     [gregorian setTimeZone:[NSTimeZone systemTimeZone]];
-	NSDateComponents *comp = [gregorian components:(NSYearCalendarUnit | NSMonthCalendarUnit) fromDate:NOW];
+	NSDateComponents *comp = [gregorian components:(NSYearCalendarUnit | NSMonthCalendarUnit) fromDate:NOW()];
 	
 	[comp setDay:info.day];
 	[comp setMonth:info.month];

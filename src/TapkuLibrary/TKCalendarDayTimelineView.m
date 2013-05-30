@@ -186,7 +186,7 @@
 	// Make it today
 	if (!self.currentDay) {
 		// Dont' want to inform the observer
-		_currentDay = NOW;
+		_currentDay = NOW();
 	}
 	
 	// Remove all previous view event
